@@ -28,8 +28,8 @@
         text-align: center;
     }
 
-    h1 { font-size: 3rem; margin-bottom: 30px; }
-    h2 { font-size: 1.5rem; margin-bottom: 20px; }
+    h1 { font-size: 3rem; margin-bottom: 30px; color: white; }
+    h2 { font-size: 1.5rem; margin-bottom: 20px; color: white; }
 
     .role-btn {
         width: 100%;
@@ -62,18 +62,19 @@
         width: 100%;
         padding: 15px;
         margin: 10px 0;
-        background: rgba(229, 57, 53, 0.7);
-        border: none;
+        background: rgba(229, 57, 53, 0.4);
+        border: 1px solid rgba(229, 57, 53, 0.6);
         border-radius: 10px;
-        color: white;
+        color: rgba(255,255,255,0.7);
         font-size: 1.1rem;
         cursor: pointer;
+        transition: all 0.3s ease;
     }
 
-    .btn:hover { background: rgba(229, 57, 53, 0.9); }
+    .btn:hover { background: rgba(229, 57, 53, 0.9); color: white; }
     .btn:disabled { background: rgba(100, 100, 100, 0.3); cursor: not-allowed; }
 
-    .btn.ready { background: rgba(229, 57, 53, 0.9); }
+    .btn.ready { background: rgba(229, 57, 53, 0.9); color: white; }
 
     .back-btn {
         background: none;
@@ -81,6 +82,7 @@
         color: rgba(255,255,255,0.7);
         cursor: pointer;
         margin-bottom: 20px;
+        font-size: 1rem;
     }
 
     .back-btn:hover { color: white; }
@@ -169,6 +171,7 @@
         border-radius: 20px;
         text-align: center;
         max-width: 500px;
+        backdrop-filter: blur(10px);
     }
 
     .part-btn {
@@ -200,6 +203,13 @@
     .note-1 { background: #4ecdc4; }
     .note-2 { background: #45b7d1; }
     .note-3 { background: #96ceb4; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        h1 { font-size: 2.5rem; }
+        .container { padding: 30px 20px; }
+        .countdown { font-size: 4rem; }
+    }
 </style>
 ```
 
@@ -213,13 +223,13 @@
 
 ```
         <button class="role-btn" onclick="selectRole('composer')">
-            <div style="font-size: 1.2rem; font-weight: bold;">🎼 Compositeur</div>
-            <div style="font-size: 0.9rem; opacity: 0.8;">Créer une session, gérer les parties</div>
+            <div style="font-size: 1.2rem; font-weight: bold; color: white;">🎼 Compositeur</div>
+            <div style="font-size: 0.9rem; opacity: 0.8; color: rgba(255,255,255,0.7);">Créer une session, gérer les parties</div>
         </button>
 
         <button class="role-btn" onclick="selectRole('musician')">
-            <div style="font-size: 1.2rem; font-weight: bold;">🎵 Musicien</div>
-            <div style="font-size: 0.9rem; opacity: 0.8;">Rejoindre une session, jouer une partie</div>
+            <div style="font-size: 1.2rem; font-weight: bold; color: white;">🎵 Musicien</div>
+            <div style="font-size: 0.9rem; opacity: 0.8; color: rgba(255,255,255,0.7);">Rejoindre une session, jouer une partie</div>
         </button>
     </div>
 </div>
@@ -230,7 +240,7 @@
         <button class="back-btn" onclick="backToRole()">← Retour</button>
         <h2 id="connection-title"></h2>
 
-        <input type="text" id="player-name" class="input" placeholder="Votre nom" />
+        <input type="text" id="player-name" class="input" placeholder="Prénom" />
 
         <div id="composer-connection">
             <button id="create-btn" class="btn" onclick="createSession()" disabled></button>
@@ -246,12 +256,12 @@
 <div id="composer-screen" class="screen">
     <div style="padding: 20px; min-height: 100vh;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <h2>🎼 Session SENSITIVE</h2>
+            <h2 style="color: white;">🎼 Session SENSITIVE</h2>
             <button class="btn" style="width: auto; padding: 10px 20px;" onclick="backToRole()">🏠 Menu</button>
         </div>
 
         <div style="background: rgba(255,255,255,0.1); padding: 25px; border-radius: 15px; margin-bottom: 25px;">
-            <h3 style="margin-bottom: 20px;">👥 Participants</h3>
+            <h3 style="margin-bottom: 20px; color: white;">👥 Participants</h3>
             <div id="musicians-list">
                 <p style="color: rgba(255,255,255,0.6);">Aucun musicien connecté</p>
             </div>
@@ -259,7 +269,7 @@
         </div>
 
         <div style="background: rgba(255,255,255,0.1); padding: 25px; border-radius: 15px; margin-bottom: 25px;">
-            <h3 style="margin-bottom: 20px;">📁 Parties MIDI</h3>
+            <h3 style="margin-bottom: 20px; color: white;">📁 Parties MIDI</h3>
             <div id="parts-list">
                 <p style="color: rgba(255,255,255,0.6);">Aucune partie chargée</p>
             </div>
@@ -267,11 +277,11 @@
         </div>
 
         <div style="background: rgba(255,255,255,0.1); padding: 25px; border-radius: 15px;">
-            <h3 style="margin-bottom: 20px;">🚀 Contrôle</h3>
+            <h3 style="margin-bottom: 20px; color: white;">🚀 Contrôle</h3>
             <button class="btn" style="background: rgba(34, 197, 94, 0.7); font-size: 1.3rem;" onclick="startSession()">
                 ▶ DÉMARRER LA SESSION
             </button>
-            <p style="text-align: center; margin-top: 10px; font-size: 0.9rem; opacity: 0.7;">
+            <p style="text-align: center; margin-top: 10px; font-size: 0.9rem; opacity: 0.7; color: white;">
                 Parties: <span id="parts-count">0</span> | Musiciens: <span id="musicians-count">0</span>
             </p>
         </div>
@@ -281,7 +291,7 @@
 <!-- INTERFACE MUSICIEN -->
 <div id="musician-screen" class="screen game-screen">
     <div class="game-header">
-        <span>🎵 Session SENSITIVE</span>
+        <span style="color: white;">🎵 Session SENSITIVE</span>
         <button style="background: rgba(100,100,100,0.6); border: none; padding: 8px 15px; border-radius: 5px; color: white; cursor: pointer;" onclick="backToRole()">🏠</button>
     </div>
 
@@ -292,7 +302,7 @@
     <!-- Sélection de partie -->
     <div id="part-selection" class="overlay">
         <div class="overlay-content">
-            <h2>Choisir votre partie</h2>
+            <h2 style="color: white;">Choisir votre partie</h2>
             <div id="available-parts">
                 <p style="color: rgba(255,255,255,0.6);">En attente des parties...</p>
             </div>
@@ -302,7 +312,7 @@
     <!-- Attente -->
     <div id="waiting" class="overlay" style="display: none;">
         <div class="overlay-content">
-            <h2>🎵 Partie sélectionnée</h2>
+            <h2 style="color: white;">🎵 Partie sélectionnée</h2>
             <div style="font-size: 1.2rem; color: #4caf50; margin: 15px 0;">
                 Partie <span id="selected-part-num"></span>
             </div>
@@ -313,9 +323,9 @@
     <!-- Décompte -->
     <div id="countdown" class="overlay" style="display: none;">
         <div class="overlay-content">
-            <h2>Décompte</h2>
+            <h2 style="color: white;">Décompte</h2>
             <div id="countdown-num" class="countdown" style="color: #ff6b6b;">1</div>
-            <div id="countdown-text">Un</div>
+            <div id="countdown-text" style="color: white;">Un</div>
             <p style="margin-top: 20px; font-size: 0.9rem; color: rgba(255,255,255,0.8);">
                 Préparez-vous à cliquer sur les pistes quand les notes traversent la ligne blanche
             </p>
@@ -327,7 +337,6 @@
     // Variables
     let currentRole = '';
     let playerName = '';
-    let roomCode = '';
     let availableParts = [];
     let connectedMusicians = [];
     let selectedPart = null;
@@ -338,101 +347,7 @@
     let activeNotes = new Set();
 
     const laneColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4'];
-
-    // Configuration du serveur MIDI
     const MIDI_SERVER = 'https://midi-sync-server.onrender.com';
-
-    // Fonctions serveur MIDI
-    async function loadPartsFromServer() {
-        try {
-            const response = await fetch(`${MIDI_SERVER}/partitions`);
-            const data = await response.json();
-
-            if (data.partitions) {
-                availableParts = data.partitions.map((partition, index) => ({
-                    id: index,
-                    name: partition.titre,
-                    fileName: `${partition.titre}.mid`,
-                    notes: createNotesFromPartition(partition, index)
-                }));
-
-                console.log('Parties chargées depuis le serveur:', availableParts);
-                updatePartsList();
-                updateAvailableParts();
-                updateStats();
-                return true;
-            }
-        } catch (error) {
-            console.error('Erreur lors du chargement des parties:', error);
-            return false;
-        }
-    }
-
-    function createNotesFromPartition(partition, partIndex) {
-        const notes = [];
-        partition.notes.forEach((noteName, index) => {
-            const midiNote = getNoteNumber(noteName);
-            notes.push({
-                note: midiNote,
-                time: index * 1500 + 6000, // Espacement de 1.5 secondes
-                lane: index % 4,
-                id: `${partIndex}-${index}`,
-                noteName: noteName
-            });
-        });
-        return notes;
-    }
-
-    function getNoteNumber(noteName) {
-        const noteMap = {
-            'Do': 60, 'Ré': 62, 'Mi': 64, 'Fa': 65,
-            'Sol': 67, 'La': 69, 'Si': 71
-        };
-        return noteMap[noteName] || 60;
-    }
-
-    async function sendPerformanceToServer(noteName, partitionName) {
-        try {
-            const performance = {
-                musicien: playerName,
-                notes: `Note ${noteName} sur ${partitionName}`,
-                timestamp: new Date().toISOString()
-            };
-
-            const response = await fetch(`${MIDI_SERVER}/performances`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(performance)
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                console.log('Performance envoyée:', result);
-            } else {
-                console.error('Erreur envoi performance:', response.status);
-            }
-        } catch (error) {
-            console.error('Erreur lors de l\'envoi:', error);
-        }
-    }
-
-    async function getSyncInfo() {
-        try {
-            const response = await fetch(`${MIDI_SERVER}/sync`);
-            const data = await response.json();
-
-            if (data) {
-                console.log('Info sync:', data);
-                // Mettre à jour le nombre de musiciens connectés
-                const syncMusicians = data.musiciens_connectes || 0;
-                document.getElementById('musicians-count').textContent = syncMusicians;
-            }
-        } catch (error) {
-            console.error('Erreur sync:', error);
-        }
-    }
 
     // Navigation
     function showScreen(screenId) {
@@ -452,14 +367,12 @@
         document.getElementById('musician-connection').style.display =
             role === 'composer' ? 'none' : 'block';
 
-        // Reset du champ nom et des boutons
         document.getElementById('player-name').value = '';
         document.getElementById('create-btn').disabled = true;
         document.getElementById('join-btn').disabled = true;
         document.getElementById('create-btn').classList.remove('ready');
         document.getElementById('join-btn').classList.remove('ready');
 
-        // Écouter les changements dans le champ nom
         setupNameListener();
     }
 
@@ -468,17 +381,13 @@
         const createBtn = document.getElementById('create-btn');
         const joinBtn = document.getElementById('join-btn');
 
-        // Supprimer l'ancien listener s'il existe
         nameInput.removeEventListener('input', nameInputHandler);
-
-        // Ajouter le nouveau listener
         nameInput.addEventListener('input', nameInputHandler);
 
         function nameInputHandler() {
             const name = nameInput.value.trim();
             const hasText = name.length >= 1;
 
-            // Activer/désactiver les boutons selon le rôle
             if (currentRole === 'composer') {
                 createBtn.disabled = !hasText;
                 if (hasText) {
@@ -500,7 +409,6 @@
             }
         }
 
-        // Permettre la validation avec Entrée
         nameInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 if (currentRole === 'composer' && !createBtn.disabled) {
@@ -515,14 +423,12 @@
     function backToRole() {
         currentRole = '';
         playerName = '';
-        roomCode = '';
         availableParts = [];
         connectedMusicians = [];
         selectedPart = null;
         gamePhase = 'lobby';
         isPlaying = false;
 
-        // Reset des overlays
         document.getElementById('part-selection').style.display = 'flex';
         document.getElementById('waiting').style.display = 'none';
         document.getElementById('countdown').style.display = 'none';
@@ -538,20 +444,8 @@
         }
 
         playerName = name;
-
         showScreen('composer-screen');
-
-        // Charger les parties depuis le serveur
-        loadPartsFromServer().then(success => {
-            if (!success) {
-                console.log('Pas de parties sur le serveur, création de parties de test');
-                createTestParts();
-            }
-        });
-
-        // Démarrer la synchronisation
-        setInterval(getSyncInfo, 5000); // Toutes les 5 secondes
-
+        loadPartsFromServer();
         updateStats();
     }
 
@@ -564,30 +458,65 @@
         }
 
         playerName = name;
-        console.log('Musicien connecté:', playerName);
-
         showScreen('musician-screen');
         setupGameArea();
-
-        // Charger les parties depuis le serveur
         loadPartsFromServer().then(success => {
-            if (success) {
-                updateAvailableParts();
-            } else {
-                // Si pas de parties sur le serveur, créer des parties de test
-                createTestParts();
-                updateAvailableParts();
-            }
+            updateAvailableParts();
         });
 
-        // S'assurer que l'overlay de sélection est visible
         document.getElementById('part-selection').style.display = 'flex';
         document.getElementById('waiting').style.display = 'none';
         document.getElementById('countdown').style.display = 'none';
     }
 
+    async function loadPartsFromServer() {
+        try {
+            const response = await fetch(`${MIDI_SERVER}/partitions`);
+            const data = await response.json();
+
+            if (data.partitions) {
+                availableParts = data.partitions.map((partition, index) => ({
+                    id: index,
+                    name: partition.titre,
+                    fileName: `${partition.titre}.mid`,
+                    notes: createNotesFromPartition(partition, index)
+                }));
+
+                updatePartsList();
+                updateAvailableParts();
+                updateStats();
+                return true;
+            }
+        } catch (error) {
+            createTestParts();
+            return false;
+        }
+    }
+
+    function createNotesFromPartition(partition, partIndex) {
+        const notes = [];
+        partition.notes.forEach((noteName, index) => {
+            const midiNote = getNoteNumber(noteName);
+            notes.push({
+                note: midiNote,
+                time: index * 1500 + 6000,
+                lane: index % 4,
+                id: `${partIndex}-${index}`,
+                noteName: noteName
+            });
+        });
+        return notes;
+    }
+
+    function getNoteNumber(noteName) {
+        const noteMap = {
+            'Do': 60, 'Ré': 62, 'Mi': 64, 'Fa': 65,
+            'Sol': 67, 'La': 69, 'Si': 71
+        };
+        return noteMap[noteName] || 60;
+    }
+
     function setupGameArea() {
-        console.log('Configuration de l\'aire de jeu...');
         const gameArea = document.getElementById('game-area');
         gameArea.innerHTML = '';
 
@@ -603,8 +532,6 @@
 
             gameArea.appendChild(lane);
         }
-
-        console.log('Aires de jeu créées');
     }
 
     function addTestMusicians() {
@@ -618,7 +545,6 @@
     }
 
     function createTestParts() {
-        // Si pas de parties du serveur, créer des parties de test
         if (availableParts.length === 0) {
             availableParts = [
                 { id: 0, name: 'Mélodie Collective', fileName: 'melodie.mid', notes: createTestNotes(0) },
@@ -635,9 +561,10 @@
         for (let i = 0; i < 8; i++) {
             notes.push({
                 note: 60 + partIndex * 3 + i,
-                time: i * 1000 + 6000,
+                time: i * 1500 + 6000,
                 lane: i % 4,
-                id: `${partIndex}-${i}`
+                id: `${partIndex}-${i}`,
+                noteName: ['Do', 'Ré', 'Mi', 'Fa', 'Sol', 'La', 'Si'][i % 7]
             });
         }
         return notes;
@@ -655,7 +582,7 @@
             const div = document.createElement('div');
             div.style.cssText = 'display: flex; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; margin: 5px 0;';
             div.innerHTML = `
-                <span>${m.name}</span>
+                <span style="color: white;">${m.name}</span>
                 <span style="color: ${m.ready ? '#4caf50' : '#ffeb3b'};">
                     ${m.part !== null ? `Partie ${m.part + 1}` : 'En attente'}
                 </span>
@@ -676,9 +603,9 @@
             const div = document.createElement('div');
             div.style.cssText = 'padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; margin: 5px 0;';
             div.innerHTML = `
-                <div style="font-weight: bold;">${p.name}</div>
+                <div style="font-weight: bold; color: white;">${p.name}</div>
                 <div style="font-size: 0.9rem; color: #4caf50;">✅ ${p.fileName}</div>
-                <div style="font-size: 0.8rem; opacity: 0.7;">${p.notes.length} notes</div>
+                <div style="font-size: 0.8rem; opacity: 0.7; color: rgba(255,255,255,0.7);">${p.notes.length} notes</div>
             `;
             list.appendChild(div);
         });
@@ -697,9 +624,9 @@
             btn.className = 'part-btn';
             btn.onclick = () => selectPart(index);
             btn.innerHTML = `
-                <div style="font-weight: bold;">${part.name}</div>
-                <div style="font-size: 0.9rem; opacity: 0.8;">${part.fileName}</div>
-                <div style="font-size: 0.8rem;">${part.notes.length} notes</div>
+                <div style="font-weight: bold; color: white;">${part.name}</div>
+                <div style="font-size: 0.9rem; opacity: 0.8; color: rgba(255,255,255,0.8);">${part.fileName}</div>
+                <div style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">${part.notes.length} notes</div>
             `;
             container.appendChild(btn);
         });
@@ -727,13 +654,11 @@
 
         gamePhase = 'countdown';
 
-        // Pour le musicien, cacher l'attente et montrer le décompte
         if (currentRole === 'musician') {
             document.getElementById('waiting').style.display = 'none';
             document.getElementById('countdown').style.display = 'flex';
             startCountdown();
         } else {
-            // Pour le compositeur, juste un message
             alert('Session démarrée ! Les musiciens voient le décompte.');
         }
     }
@@ -773,10 +698,8 @@
 
         const currentTime = Date.now() - startTime;
 
-        // Nettoyer les anciennes notes
         document.querySelectorAll('.note').forEach(n => n.remove());
 
-        // Afficher les notes actuelles
         midiNotes.forEach(note => {
             const position = ((6000 - (note.time - currentTime)) / 6000) * 100;
 
@@ -784,7 +707,7 @@
                 const noteEl = document.createElement('div');
                 noteEl.className = `note note-${note.lane}`;
                 noteEl.style.top = position + '%';
-                noteEl.textContent = note.note;
+                noteEl.textContent = note.noteName || note.note;
 
                 const lane = document.querySelector(`.lane-${note.lane}`);
                 if (lane) lane.appendChild(noteEl);
@@ -810,16 +733,11 @@
 
             console.log(`Note ${note.noteName || note.note} touchée !`);
 
-            // Envoyer la performance au serveur
-            const partitionName = availableParts[selectedPart]?.name || 'Partition inconnue';
-            sendPerformanceToServer(note.noteName || note.note, partitionName);
-
-            // Effet visuel de réussite
             const lanes = document.querySelectorAll('.lane');
             if (lanes[laneIndex]) {
                 lanes[laneIndex].style.background = 'rgba(76, 175, 80, 0.3)';
                 setTimeout(() => {
-                    lanes[laneIndex].style.background = `rgba(${laneColors[laneIndex].replace('#', '').match(/.{2}/g).map(x => parseInt(x, 16)).join(', ')}, 0.1)`;
+                    lanes[laneIndex].style.background = '';
                 }, 200);
             }
         }
