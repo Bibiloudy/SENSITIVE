@@ -92,7 +92,6 @@ width: auto;
 padding: 10px;
 }
 
-/* Interface de jeu */
 .game-header {
 background: rgba(255,255,255,0.1);
 padding: 15px 20px;
@@ -191,7 +190,6 @@ margin: 20px 0;
 text-shadow: 0 0 30px currentColor;
 }
 
-/* Couleurs des pistes */
 .lane-0 { background: rgba(255, 107, 107, 0.1); }
 .lane-1 { background: rgba(78, 205, 196, 0.1); }
 .lane-2 { background: rgba(69, 183, 209, 0.1); }
@@ -224,6 +222,17 @@ border-radius: 8px;
 margin: 5px 0;
 }
 
+.connection-status {
+position: fixed;
+top: 20px;
+right: 20px;
+padding: 10px 15px;
+border-radius: 10px;
+font-size: 0.9rem;
+z-index: 100;
+background: rgba(76, 175, 80, 0.8);
+}
+
 @media (max-width: 768px) {
 .container { padding: 30px 20px; }
 h1 { font-size: 2.5rem; }
@@ -233,6 +242,10 @@ h1 { font-size: 2.5rem; }
 
 </head>
 <body>
+
+<div id="connection-status" class="connection-status">
+  🟢 Firebase Ready
+</div>
 
 <!-- SÉLECTION DE RÔLE -->
 
@@ -244,12 +257,12 @@ h1 { font-size: 2.5rem; }
 ```
 <button class="role-btn" onclick="selectRole('composer')">
   <div style="font-size: 1.2rem; font-weight: bold;">🎼 Compositeur</div>
-  <div style="font-size: 0.9rem; opacity: 0.8;">Créer une session, gérer les parties</div>
+  <div style="font-size: 0.9rem; opacity: 0.8;">Créer une session synchronisée</div>
 </button>
 
 <button class="role-btn" onclick="selectRole('musician')">
   <div style="font-size: 1.2rem; font-weight: bold;">🎵 Musicien</div>
-  <div style="font-size: 0.9rem; opacity: 0.8;">Rejoindre une session, jouer une partie</div>
+  <div style="font-size: 0.9rem; opacity: 0.8;">Rejoindre la session en temps réel</div>
 </button>
 ```
 
@@ -282,28 +295,28 @@ h1 { font-size: 2.5rem; }
 
 ```
 <div class="section">
-  <h3 style="margin-bottom: 20px;">👥 Participants</h3>
+  <h3 style="margin-bottom: 20px;">👥 Musiciens connectés en temps réel</h3>
   <div id="musicians-list">
-    <p style="color: rgba(255,255,255,0.6);">Aucun musicien connecté</p>
+    <p style="color: rgba(255,255,255,0.6);">En attente de connexions...</p>
   </div>
-  <button onclick="addTestMusicians()">+ Ajouter musiciens test</button>
+  <button onclick="simulateMusicians()">🧪 Simuler connexions</button>
 </div>
 
 <div class="section">
-  <h3 style="margin-bottom: 20px;">📁 Parties MIDI</h3>
+  <h3 style="margin-bottom: 20px;">📁 Parties synchronisées</h3>
   <div id="parts-list">
-    <p style="color: rgba(255,255,255,0.6);">Aucune partie chargée</p>
+    <p style="color: rgba(255,255,255,0.6);">Initialisation...</p>
   </div>
-  <button onclick="createTestParts()">🧪 Créer parties de test</button>
+  <button onclick="createSyncParts()">🎵 Générer parties</button>
 </div>
 
 <div class="section">
-  <h3 style="margin-bottom: 20px;">🚀 Contrôle</h3>
-  <button style="background: rgba(34, 197, 94, 0.7); font-size: 1.3rem;" onclick="startSession()">
-    ▶ DÉMARRER LA SESSION
+  <h3 style="margin-bottom: 20px;">🚀 Contrôle de session</h3>
+  <button style="background: rgba(34, 197, 94, 0.7); font-size: 1.3rem;" onclick="broadcastStart()">
+    ▶ DÉMARRER POUR TOUS
   </button>
   <p style="text-align: center; margin-top: 10px; font-size: 0.9rem; opacity: 0.7;">
-    Parties: <span id="parts-count">0</span> | Musiciens: <span id="musicians-count">0</span>
+    Parties: <span id="parts-count">0</span> | Connectés: <span id="musicians-count">0</span>
   </p>
 </div>
 ```
@@ -315,44 +328,41 @@ h1 { font-size: 2.5rem; }
 
 <div id="musician-screen" class="game-screen">
   <div class="game-header">
-    <span>🎵 Session SENSITIVE</span>
+    <span>🎵 Session SENSITIVE - Temps réel</span>
     <button style="background: rgba(100,100,100,0.6); border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;" onclick="backToRole()">🏠</button>
   </div>
 
   <div class="game-area" id="game-area"></div>
 
-  <!-- Sélection de partie -->
-
   <div id="part-selection" class="overlay">
     <div class="overlay-content">
-      <h2>Choisir votre partie</h2>
+      <h2>Sélection synchronisée</h2>
       <div id="available-parts">
-        <p style="color: rgba(255,255,255,0.6);">En attente des parties...</p>
+        <p style="color: rgba(255,255,255,0.6);">Synchronisation avec le compositeur...</p>
       </div>
     </div>
   </div>
-
-  <!-- Attente -->
 
   <div id="waiting" class="overlay" style="display: none;">
     <div class="overlay-content">
-      <h2>🎵 Partie sélectionnée</h2>
+      <h2>🎵 Prêt à jouer</h2>
       <div style="font-size: 1.2rem; color: #4caf50; margin: 15px 0;">
-        Partie <span id="selected-part-num"></span>
+        <span id="selected-part-name"></span>
       </div>
-      <p style="color: #45b7d1;">En attente du démarrage...</p>
+      <p style="color: #45b7d1;">Synchronisé avec la session</p>
+      <div style="margin-top: 20px; font-size: 0.9rem; opacity: 0.8;">
+        Session ID: <span style="color: #4caf50;">#DEMO-SYNC</span>
+      </div>
     </div>
   </div>
 
-  <!-- Décompte -->
-
   <div id="countdown" class="overlay" style="display: none;">
     <div class="overlay-content">
-      <h2>Décompte</h2>
-      <div id="countdown-num" class="countdown" style="color: #ff6b6b;">1</div>
-      <div id="countdown-text">Un</div>
+      <h2>Décompte synchronisé</h2>
+      <div id="countdown-num" class="countdown" style="color: #ff6b6b;">3</div>
+      <div id="countdown-text">Trois</div>
       <p style="margin-top: 20px; font-size: 0.9rem; color: rgba(255,255,255,0.8);">
-        Préparez-vous à cliquer sur les pistes quand les notes traversent la ligne blanche
+        Tous les musiciens démarrent ensemble !
       </p>
     </div>
   </div>
@@ -362,16 +372,69 @@ h1 { font-size: 2.5rem; }
 // Variables globales
 let currentRole = '';
 let playerName = '';
-let availableParts = [];
-let connectedMusicians = [];
+let playerId = '';
+let sessionData = {
+  musicians: {},
+  parts: [],
+  gamePhase: 'lobby',
+  startTime: null
+};
 let selectedPart = null;
-let gamePhase = 'lobby';
 let isPlaying = false;
 let midiNotes = [];
-let startTime = 0;
+let gameStartTime = 0;
 let activeNotes = new Set();
 
-const laneColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4'];
+// Simulation Firebase avec localStorage pour la démo
+function initFirebaseDemo() {
+  console.log('🔥 Firebase Demo Mode - Synchronisation simulée');
+
+  // Initialiser les données de session
+  if (!localStorage.getItem('sensitive_session')) {
+    localStorage.setItem('sensitive_session', JSON.stringify(sessionData));
+  } else {
+    sessionData = JSON.parse(localStorage.getItem('sensitive_session'));
+  }
+
+  // Écouter les changements
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'sensitive_session') {
+      sessionData = JSON.parse(e.newValue);
+      updateFromSession();
+    }
+  });
+
+  updateConnectionStatus();
+}
+
+function saveSession() {
+  localStorage.setItem('sensitive_session', JSON.stringify(sessionData));
+  // Déclencher l'événement pour les autres onglets
+  window.dispatchEvent(new StorageEvent('storage', {
+    key: 'sensitive_session',
+    newValue: JSON.stringify(sessionData)
+  }));
+}
+
+function updateFromSession() {
+  if (currentRole === 'composer') {
+    updateMusiciansList();
+    updateStats();
+  } else if (currentRole === 'musician') {
+    updateAvailableParts();
+
+    // Démarrage automatique
+    if (sessionData.gamePhase === 'countdown' && document.getElementById('waiting').style.display !== 'none') {
+      document.getElementById('waiting').style.display = 'none';
+      document.getElementById('countdown').style.display = 'flex';
+      startCountdown();
+    }
+  }
+}
+
+function updateConnectionStatus() {
+  document.getElementById('connection-status').innerHTML = '🟢 Synchronisé';
+}
 
 // Navigation
 function showScreen(screenId) {
@@ -382,10 +445,8 @@ function showScreen(screenId) {
 function selectRole(role) {
   currentRole = role;
   showScreen('connection-screen');
-
   document.getElementById('connection-title').textContent =
     role === 'composer' ? '🎼 Compositeur' : '🎵 Musicien';
-
   document.getElementById('player-name').value = '';
   updateButton();
 }
@@ -397,7 +458,7 @@ function updateButton() {
   if (name.length >= 1) {
     btn.disabled = false;
     btn.classList.add('ready');
-    btn.textContent = currentRole === 'composer' ? 'Créer la session' : 'Rejoindre';
+    btn.textContent = currentRole === 'composer' ? 'Créer session' : 'Rejoindre';
   } else {
     btn.disabled = true;
     btn.classList.remove('ready');
@@ -419,27 +480,41 @@ function connect() {
   }
 
   playerName = name;
+  playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+
+  // Ajouter à la session
+  sessionData.musicians[playerId] = {
+    id: playerId,
+    name: playerName,
+    role: currentRole,
+    joinTime: Date.now(),
+    ready: false,
+    selectedPart: null
+  };
+
+  saveSession();
 
   if (currentRole === 'composer') {
     showScreen('composer-screen');
-    createTestParts();
-    updateStats();
+    createSyncParts();
   } else {
     showScreen('musician-screen');
     setupGameArea();
-    createTestParts();
-    updateAvailableParts();
-    document.getElementById('part-selection').style.display = 'flex';
+    showPartSelection();
   }
 }
 
 function backToRole() {
+  // Nettoyer les données du joueur
+  if (playerId && sessionData.musicians[playerId]) {
+    delete sessionData.musicians[playerId];
+    saveSession();
+  }
+
   currentRole = '';
   playerName = '';
-  availableParts = [];
-  connectedMusicians = [];
+  playerId = '';
   selectedPart = null;
-  gamePhase = 'lobby';
   isPlaying = false;
   activeNotes.clear();
 
@@ -451,67 +526,93 @@ function backToRole() {
 }
 
 // Interface compositeur
-function addTestMusicians() {
-  connectedMusicians = [
-    { name: 'Alice', ready: true, part: 0 },
-    { name: 'Bob', ready: false, part: null },
-    { name: 'Charlie', ready: true, part: 1 }
-  ];
-  updateMusiciansList();
-  updateStats();
-}
-
-function createTestParts() {
-  availableParts = [
+function createSyncParts() {
+  sessionData.parts = [
     {
-      id: 0,
-      name: 'Mélodie Collective',
-      fileName: 'melodie.mid',
-      notes: createTestNotes(0)
+      id: 'melody',
+      name: 'Mélodie Synchronisée',
+      fileName: 'sync_melody.mid',
+      notes: generateNotes(0, 'melody')
     },
     {
-      id: 1,
-      name: 'Rythme Partagé',
-      fileName: 'rythme.mid',
-      notes: createTestNotes(1)
+      id: 'rhythm',
+      name: 'Rythme Collectif',
+      fileName: 'sync_rhythm.mid',
+      notes: generateNotes(1, 'rhythm')
+    },
+    {
+      id: 'harmony',
+      name: 'Harmonie Partagée',
+      fileName: 'sync_harmony.mid',
+      notes: generateNotes(2, 'harmony')
     }
   ];
+
+  saveSession();
   updatePartsList();
-  updateAvailableParts();
   updateStats();
 }
 
-function createTestNotes(partIndex) {
+function generateNotes(partIndex, type) {
   const notes = [];
   const noteNames = ['Do', 'Ré', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
+  const patterns = {
+    0: [0, 2, 1, 3, 0, 1, 2, 3, 0, 2, 1, 3], // Mélodie
+    1: [0, 0, 1, 1, 2, 2, 3, 3, 0, 1, 2, 3], // Rythme
+    2: [1, 3, 1, 3, 2, 0, 2, 0, 1, 3, 0, 2]  // Harmonie
+  };
 
-  for (let i = 0; i < 12; i++) {
+  const pattern = patterns[partIndex] || patterns[0];
+
+  for (let i = 0; i < 15; i++) {
     notes.push({
-      note: 60 + partIndex * 3 + i,
-      time: i * 1200 + 6000,
-      lane: i % 4,
-      id: `${partIndex}-${i}`,
+      note: 60 + partIndex * 2 + i,
+      time: i * 900 + 4000,
+      lane: pattern[i % pattern.length],
+      id: `${type}-${i}`,
       noteName: noteNames[i % 7]
     });
   }
   return notes;
 }
 
+function simulateMusicians() {
+  const musicians = ['Alice', 'Bob', 'Charlie', 'Diana'];
+  musicians.forEach((name, i) => {
+    const id = 'sim_' + i;
+    sessionData.musicians[id] = {
+      id: id,
+      name: name,
+      role: 'musician',
+      joinTime: Date.now() - (i * 5000),
+      ready: Math.random() > 0.3,
+      selectedPart: sessionData.parts[i % sessionData.parts.length]?.id || null
+    };
+  });
+
+  saveSession();
+}
+
 function updateMusiciansList() {
   const list = document.getElementById('musicians-list');
-  if (connectedMusicians.length === 0) {
-    list.innerHTML = '<p style="color: rgba(255,255,255,0.6);">Aucun musicien connecté</p>';
+  const musicians = Object.values(sessionData.musicians).filter(m => m.role === 'musician');
+
+  if (musicians.length === 0) {
+    list.innerHTML = '<p style="color: rgba(255,255,255,0.6);">En attente de connexions...</p>';
     return;
   }
 
   list.innerHTML = '';
-  connectedMusicians.forEach(m => {
+  musicians.forEach(m => {
     const div = document.createElement('div');
     div.className = 'musician-item';
+    const partName = m.selectedPart ? sessionData.parts.find(p => p.id === m.selectedPart)?.name || 'Partie inconnue' : 'Sélection...';
+    const status = m.ready ? '🟢 Prêt' : '🟡 Attente';
+
     div.innerHTML = `
       <span>${m.name}</span>
       <span style="color: ${m.ready ? '#4caf50' : '#ffeb3b'};">
-        ${m.part !== null ? `Partie ${m.part + 1}` : 'En attente'}
+        ${partName} ${status}
       </span>
     `;
     list.appendChild(div);
@@ -520,44 +621,47 @@ function updateMusiciansList() {
 
 function updatePartsList() {
   const list = document.getElementById('parts-list');
-  if (availableParts.length === 0) {
-    list.innerHTML = '<p style="color: rgba(255,255,255,0.6);">Aucune partie chargée</p>';
+  if (sessionData.parts.length === 0) {
+    list.innerHTML = '<p style="color: rgba(255,255,255,0.6);">Initialisation...</p>';
     return;
   }
 
   list.innerHTML = '';
-  availableParts.forEach(p => {
+  sessionData.parts.forEach(p => {
     const div = document.createElement('div');
     div.style.cssText = 'padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; margin: 5px 0;';
     div.innerHTML = `
       <div style="font-weight: bold;">${p.name}</div>
-      <div style="font-size: 0.9rem; color: #4caf50;">✅ ${p.fileName}</div>
-      <div style="font-size: 0.8rem; opacity: 0.7;">${p.notes.length} notes</div>
+      <div style="font-size: 0.9rem; color: #4caf50;">🔄 ${p.fileName}</div>
+      <div style="font-size: 0.8rem; opacity: 0.7;">${p.notes.length} notes synchronisées</div>
     `;
     list.appendChild(div);
   });
 }
 
 function updateStats() {
-  document.getElementById('parts-count').textContent = availableParts.length;
-  document.getElementById('musicians-count').textContent = connectedMusicians.length;
+  const musicians = Object.values(sessionData.musicians).filter(m => m.role === 'musician');
+  document.getElementById('parts-count').textContent = sessionData.parts.length;
+  document.getElementById('musicians-count').textContent = musicians.length;
 }
 
-function startSession() {
-  if (availableParts.length === 0) {
-    alert('Créez d\'abord des parties de test !');
+function broadcastStart() {
+  if (sessionData.parts.length === 0) {
+    alert('Créez d\'abord les parties !');
     return;
   }
 
-  gamePhase = 'countdown';
-
-  if (currentRole === 'musician' && selectedPart !== null) {
-    document.getElementById('waiting').style.display = 'none';
-    document.getElementById('countdown').style.display = 'flex';
-    startCountdown();
-  } else {
-    alert('Session démarrée ! Les musiciens voient le décompte.');
+  const musicians = Object.values(sessionData.musicians).filter(m => m.role === 'musician');
+  if (musicians.length === 0) {
+    alert('Aucun musicien connecté ! Ouvrez un autre onglet comme musicien.');
+    return;
   }
+
+  sessionData.gamePhase = 'countdown';
+  sessionData.startTime = Date.now() + 5000; // Démarrage dans 5s
+  saveSession();
+
+  alert(`🚀 Démarrage envoyé à ${musicians.length} musicien(s) !`);
 }
 
 // Interface musicien
@@ -579,18 +683,24 @@ function setupGameArea() {
   }
 }
 
+function showPartSelection() {
+  document.getElementById('part-selection').style.display = 'flex';
+  updateAvailableParts();
+}
+
 function updateAvailableParts() {
   const container = document.getElementById('available-parts');
-  if (availableParts.length === 0) {
-    container.innerHTML = '<p style="color: rgba(255,255,255,0.6);">En attente des parties...</p>';
+
+  if (sessionData.parts.length === 0) {
+    container.innerHTML = '<p style="color: rgba(255,255,255,0.6);">Synchronisation...</p>';
     return;
   }
 
   container.innerHTML = '';
-  availableParts.forEach((part, index) => {
+  sessionData.parts.forEach((part) => {
     const btn = document.createElement('button');
     btn.className = 'part-btn';
-    btn.onclick = () => selectPart(index);
+    btn.onclick = () => selectPart(part.id);
     btn.innerHTML = `
       <div style="font-weight: bold;">${part.name}</div>
       <div style="font-size: 0.9rem; opacity: 0.8;">${part.fileName}</div>
@@ -600,29 +710,38 @@ function updateAvailableParts() {
   });
 }
 
-function selectPart(partIndex) {
-  selectedPart = partIndex;
-  midiNotes = availableParts[partIndex].notes;
+function selectPart(partId) {
+  selectedPart = partId;
+  const part = sessionData.parts.find(p => p.id === partId);
+  if (!part) return;
+
+  midiNotes = part.notes;
+
+  if (sessionData.musicians[playerId]) {
+    sessionData.musicians[playerId].selectedPart = partId;
+    sessionData.musicians[playerId].ready = true;
+    saveSession();
+  }
 
   document.getElementById('part-selection').style.display = 'none';
   document.getElementById('waiting').style.display = 'flex';
-  document.getElementById('selected-part-num').textContent = partIndex + 1;
+  document.getElementById('selected-part-name').textContent = part.name;
 }
 
 function startCountdown() {
-  let count = 1;
+  let count = 3;
   const countdownNum = document.getElementById('countdown-num');
   const countdownText = document.getElementById('countdown-text');
-  const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4'];
-  const texts = ['Un', 'Deux', 'Trois', 'Quatre'];
+  const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1'];
+  const texts = ['Trois', 'Deux', 'Un'];
 
   const interval = setInterval(() => {
     countdownNum.textContent = count;
     countdownNum.style.color = colors[count - 1];
     countdownText.textContent = texts[count - 1];
 
-    count++;
-    if (count > 4) {
+    count--;
+    if (count < 1) {
       clearInterval(interval);
       setTimeout(() => {
         document.getElementById('countdown').style.display = 'none';
@@ -634,22 +753,19 @@ function startCountdown() {
 
 function startGame() {
   isPlaying = true;
-  gamePhase = 'playing';
-  startTime = Date.now();
+  gameStartTime = Date.now();
   animate();
 }
 
 function animate() {
   if (!isPlaying) return;
 
-  const currentTime = Date.now() - startTime;
+  const currentTime = Date.now() - gameStartTime;
 
-  // Nettoyer les anciennes notes
   document.querySelectorAll('.note').forEach(n => n.remove());
 
-  // Afficher les notes actuelles
   midiNotes.forEach(note => {
-    const position = ((6000 - (note.time - currentTime)) / 6000) * 100;
+    const position = ((4000 - (note.time - currentTime)) / 4000) * 100;
 
     if (position > -10 && position < 110) {
       const noteEl = document.createElement('div');
@@ -666,7 +782,7 @@ function animate() {
       }
 
       noteEl.style.top = position + '%';
-      noteEl.textContent = note.noteName || note.note;
+      noteEl.textContent = note.noteName;
 
       const lane = document.querySelector(`.lane-${note.lane}`);
       if (lane) lane.appendChild(noteEl);
@@ -679,10 +795,10 @@ function animate() {
 function clickLane(laneIndex) {
   if (!isPlaying) return;
 
-  const currentTime = Date.now() - startTime;
+  const currentTime = Date.now() - gameStartTime;
   const hittableNotes = midiNotes.filter(note => {
     if (note.lane !== laneIndex || activeNotes.has(note.id)) return false;
-    const position = ((6000 - (note.time - currentTime)) / 6000) * 100;
+    const position = ((4000 - (note.time - currentTime)) / 4000) * 100;
     return position >= 62 && position <= 70;
   });
 
@@ -690,9 +806,6 @@ function clickLane(laneIndex) {
     const note = hittableNotes[0];
     activeNotes.add(note.id);
 
-    console.log(`Note ${note.noteName || note.note} touchée !`);
-
-    // Effet visuel de réussite
     const lanes = document.querySelectorAll('.lane');
     if (lanes[laneIndex]) {
       lanes[laneIndex].style.background = 'rgba(76, 175, 80, 0.5)';
@@ -704,6 +817,7 @@ function clickLane(laneIndex) {
 }
 
 // Initialisation
+initFirebaseDemo();
 showScreen('role-screen');
 </script>
 
