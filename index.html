@@ -1,42 +1,318 @@
 <!DOCTYPE html>
-<html>
+
+<html lang="fr">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SENSITIVE</title>
     <style>
-        body {
-            background: linear-gradient(135deg, #0d4f3c 0%, #1a5f47 50%, #0e3f32 100%);
-            color: white;
-            font-family: Arial, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #0d4f3c 0%, #1a5f47 50%, #0e3f32 100%);
+        color: white;
+        min-height: 100vh;
+    }
+
+    .screen {
+        display: none;
+        min-height: 100vh;
+    }
+
+    .screen.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .container {
+        max-width: 500px;
+        background: rgba(255,255,255,0.1);
+        padding: 40px;
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 3rem;
+        margin-bottom: 30px;
+        color: white;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        color: white;
+    }
+
+    .role-btn {
+        width: 100%;
+        padding: 20px;
+        margin: 10px 0;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 15px;
+        color: white;
+        cursor: pointer;
+        text-align: left;
+        transition: all 0.3s ease;
+    }
+
+    .role-btn:hover {
+        background: rgba(255,255,255,0.2);
+    }
+
+    .input {
+        width: 100%;
+        padding: 15px;
+        margin: 10px 0;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 10px;
+        color: white;
+        font-size: 1rem;
+    }
+
+    .input::placeholder {
+        color: rgba(255,255,255,0.6);
+    }
+
+    .btn {
+        width: 100%;
+        padding: 15px;
+        margin: 10px 0;
+        background: rgba(229, 57, 53, 0.4);
+        border: 1px solid rgba(229, 57, 53, 0.6);
+        border-radius: 10px;
+        color: rgba(255,255,255,0.7);
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        background: rgba(229, 57, 53, 0.9);
+        color: white;
+    }
+
+    .btn:disabled {
+        background: rgba(100, 100, 100, 0.3);
+        cursor: not-allowed;
+    }
+
+    .btn.ready {
+        background: rgba(229, 57, 53, 0.9);
+        color: white;
+    }
+
+    .back-btn {
+        background: none;
+        border: none;
+        color: rgba(255,255,255,0.7);
+        cursor: pointer;
+        margin-bottom: 20px;
+        font-size: 1rem;
+    }
+
+    .back-btn:hover {
+        color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 2.5rem;
         }
         .container {
-            text-align: center;
-            background: rgba(255,255,255,0.1);
-            padding: 50px;
-            border-radius: 20px;
+            padding: 30px 20px;
         }
-        h1 { font-size: 3rem; margin-bottom: 30px; }
-        .btn {
-            background: rgba(229, 57, 53, 0.8);
-            color: white;
-            border: none;
-            padding: 20px 40px;
-            margin: 10px;
-            border-radius: 15px;
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-    </style>
+    }
+</style>
+```
+
 </head>
 <body>
-    <div class="container">
-        <h1>SENSITIVE</h1>
-        <p>Interface de test - Fond vert nuit</p>
-        <button class="btn">Test Button</button>
+    <!-- SÉLECTION DE RÔLE -->
+    <div id="role-screen" class="screen active">
+        <div class="container">
+            <h1>SENSITIVE</h1>
+            <h2>Choisissez votre rôle</h2>
+
+```
+        <button class="role-btn" onclick="selectRole('composer')">
+            <div style="font-size: 1.2rem; font-weight: bold; color: white;">🎼 Compositeur</div>
+            <div style="font-size: 0.9rem; opacity: 0.8; color: rgba(255,255,255,0.7);">Créer une session, gérer les parties</div>
+        </button>
+
+        <button class="role-btn" onclick="selectRole('musician')">
+            <div style="font-size: 1.2rem; font-weight: bold; color: white;">🎵 Musicien</div>
+            <div style="font-size: 0.9rem; opacity: 0.8; color: rgba(255,255,255,0.7);">Rejoindre une session, jouer une partie</div>
+        </button>
     </div>
+</div>
+
+<!-- CONNEXION -->
+<div id="connection-screen" class="screen">
+    <div class="container">
+        <button class="back-btn" onclick="backToRole()">← Retour</button>
+        <h2 id="connection-title"></h2>
+
+        <input type="text" id="player-name" class="input" placeholder="Prénom" />
+
+        <div id="composer-connection">
+            <button id="create-btn" class="btn" onclick="createSession()" disabled></button>
+        </div>
+
+        <div id="musician-connection" style="display: none;">
+            <button id="join-btn" class="btn" onclick="joinSession()" disabled></button>
+        </div>
+    </div>
+</div>
+
+<!-- INTERFACE SIMPLE -->
+<div id="composer-screen" class="screen">
+    <div class="container">
+        <h2>🎼 Session SENSITIVE</h2>
+        <p style="color: rgba(255,255,255,0.8); margin: 20px 0;">
+            Bienvenue <strong id="composer-name"></strong> !
+        </p>
+        <p style="color: rgba(255,255,255,0.6); margin-bottom: 30px;">
+            Session créée avec succès. Les musiciens peuvent maintenant vous rejoindre.
+        </p>
+        <button class="btn" onclick="backToRole()">🏠 Retour au menu</button>
+    </div>
+</div>
+
+<div id="musician-screen" class="screen">
+    <div class="container">
+        <h2>🎵 Musicien connecté</h2>
+        <p style="color: rgba(255,255,255,0.8); margin: 20px 0;">
+            Bienvenue <strong id="musician-name"></strong> !
+        </p>
+        <p style="color: rgba(255,255,255,0.6); margin-bottom: 30px;">
+            Vous êtes connecté à la session SENSITIVE. L'interface de jeu sera ajoutée prochainement.
+        </p>
+        <button class="btn" onclick="backToRole()">🏠 Retour au menu</button>
+    </div>
+</div>
+
+<script>
+    let currentRole = '';
+    let playerName = '';
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function selectRole(role) {
+        currentRole = role;
+        showScreen('connection-screen');
+
+        document.getElementById('connection-title').textContent =
+            role === 'composer' ? '🎼 Compositeur' : '🎵 Musicien';
+
+        document.getElementById('composer-connection').style.display =
+            role === 'composer' ? 'block' : 'none';
+        document.getElementById('musician-connection').style.display =
+            role === 'composer' ? 'none' : 'block';
+
+        // Reset
+        document.getElementById('player-name').value = '';
+        document.getElementById('create-btn').disabled = true;
+        document.getElementById('join-btn').disabled = true;
+        document.getElementById('create-btn').classList.remove('ready');
+        document.getElementById('join-btn').classList.remove('ready');
+
+        setupNameListener();
+    }
+
+    function setupNameListener() {
+        const nameInput = document.getElementById('player-name');
+        const createBtn = document.getElementById('create-btn');
+        const joinBtn = document.getElementById('join-btn');
+
+        nameInput.removeEventListener('input', nameInputHandler);
+        nameInput.addEventListener('input', nameInputHandler);
+
+        function nameInputHandler() {
+            const name = nameInput.value.trim();
+            const hasText = name.length >= 1;
+
+            if (currentRole === 'composer') {
+                createBtn.disabled = !hasText;
+                if (hasText) {
+                    createBtn.classList.add('ready');
+                    createBtn.textContent = 'Créer la session';
+                } else {
+                    createBtn.classList.remove('ready');
+                    createBtn.textContent = '';
+                }
+            } else {
+                joinBtn.disabled = !hasText;
+                if (hasText) {
+                    joinBtn.classList.add('ready');
+                    joinBtn.textContent = 'Rejoindre';
+                } else {
+                    joinBtn.classList.remove('ready');
+                    joinBtn.textContent = '';
+                }
+            }
+        }
+
+        nameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                if (currentRole === 'composer' && !createBtn.disabled) {
+                    createSession();
+                } else if (currentRole === 'musician' && !joinBtn.disabled) {
+                    joinSession();
+                }
+            }
+        });
+    }
+
+    function backToRole() {
+        currentRole = '';
+        playerName = '';
+        showScreen('role-screen');
+    }
+
+    function createSession() {
+        const name = document.getElementById('player-name').value.trim();
+        if (name.length < 1) {
+            alert('Entrez votre nom');
+            return;
+        }
+
+        playerName = name;
+        document.getElementById('composer-name').textContent = name;
+        showScreen('composer-screen');
+    }
+
+    function joinSession() {
+        const name = document.getElementById('player-name').value.trim();
+
+        if (name.length < 1) {
+            alert('Entrez votre nom');
+            return;
+        }
+
+        playerName = name;
+        document.getElementById('musician-name').textContent = name;
+        showScreen('musician-screen');
+    }
+
+    // Initialisation
+    showScreen('role-screen');
+</script>
+```
+
 </body>
 </html>
